@@ -52,6 +52,44 @@ public class ThreadSafeLRUCache<K, V> {
      * Person 2
      */
 
+     private V getInternal( K key){
+            return null; 
+     }
+
+     private void putInternal(K key, V value){
+
+     }
+
+     private V removeInternal(K key){
+        return null;
+     }
+
+     //P3
+
+     public V get(K key){
+
+     }
+
+     public void put(K key, V value){
+
+     }
+
+     public boolean containsKey(K key){
+
+     }
+
+     public int size(){
+
+     }
+
+     public void clear(){
+
+     }
+
+     public V remove(K key){
+
+     }
+
     private void removeNode(Node node) {
         node.prev.next = node.next;
         node.next.prev = node.prev;
