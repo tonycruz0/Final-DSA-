@@ -49,8 +49,7 @@ public class ThreadSafeLRUCache<K, V> {
     }
 
     /**
-     * 
-     * 
+     * Person 2
      */
 
     private void removeNode(Node node) {
@@ -101,5 +100,5 @@ public class ThreadSafeLRUCache<K, V> {
 
 
 
-     
+
 }
