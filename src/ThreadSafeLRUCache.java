@@ -53,26 +53,59 @@ public class ThreadSafeLRUCache<K, V> {
      */
 
      private V getInternal( K key){
-            return null; 
+        if (cache.containsKey(key)){
+            Node gotNode = cache.get(key);
+            movetoHead(gotNode);
+            return gotNode.value;
+
+        }
+        else{
+            System.out.println("-1");
+            return null;
+        }
+
+
      }
 
      private void putInternal(K key, V value){
-
+        
+        if (cache.containsKey(key)){
+            //Creating a duplicate of the old Node, updating its value, deleting the old node, moving the new node to the front
+            Node existingNode = cache.get(key);
+            existingNode.value = value;
+            removeInternal(key);
+            movetoHead(existingNode);
+            cache.put(key, existingNode);
+        }
+        else{
+            if(cache.size() == capacity){
+                remove(tail.prev.key);
+                removeTail();
+            }
+            //If the hashMap is already full delete a node.
+            //Add a new node with the given key value to the head of the linked list.
+            Node newNode = new Node(key, value);
+            movetoHead(newNode);
+            cache.put(key, newNode);
+        }
      }
 
      private V removeInternal(K key){
-        return null;
+        Node removeNode = cache.get(key);
+        removeNode(cache.get(key));
+        cache.remove(key);
+        return removeNode.value;
      }
 
      //P3
 
-     public V get(K key){
+    public V get(K key){
 
      }
 
-     public void put(K key, V value){
+    public void put(K key, V value){
 
-     }
+    }
 
      public boolean containsKey(K key){
 
