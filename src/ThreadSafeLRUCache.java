@@ -93,7 +93,7 @@ public class ThreadSafeLRUCache<K, V> {
      private V removeInternal(K key){
         Node removeNode = cache.get(key);
         removeNode(cache.get(key));
-        cache.remove(key);
+        remove(key);
         return removeNode.value;
      }
 
