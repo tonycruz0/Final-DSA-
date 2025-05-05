@@ -5,12 +5,6 @@ import java.util.concurrent.locks.Lock;
 
 public class ThreadSafeLRUCache<K, V> {
 
-    /**
-     * Node class & Linked List
-     * doubly linked list tracks cache order
-     * Each node contains the key and value pair and pointers to aj nodes
-     */
-
     private class Node {
         K key;
         V value;
@@ -25,8 +19,8 @@ public class ThreadSafeLRUCache<K, V> {
 
     private final int capacity;
     private final Map<K, Node> cache;
-    private Node head; // Most recently used
-    private Node tail; // Least recently used
+    private Node head;
+    private Node tail;
     private final ReentrantReadWriteLock rwLock;
     private final Lock readLock;
     private final Lock writeLock;
@@ -48,32 +42,21 @@ public class ThreadSafeLRUCache<K, V> {
         this.writeLock = rwLock.writeLock();
     }
 
-    /**
-     * Person 2
-     */
-
-     private V getInternal( K key){
-        if (cache.containsKey(key)){
+    private V getInternal(K key) {
+        if (cache.containsKey(key)) {
             Node gotNode = cache.get(key);
             movetoHead(gotNode);
             return gotNode.value;
-
-        }
-        else{
+        } else {
             System.out.println("-1");
             return null;
         }
+    }
 
-
-     }
-
-     private void putInternal(K key, V value){
-        
-        if (cache.containsKey(key)){
-            //Creating a duplicate of the old Node, updating its value, deleting the old node, moving the new node to the front
+    private void putInternal(K key, V value) {
+        if (cache.containsKey(key)) {
             Node existingNode = cache.get(key);
             existingNode.value = value;
-            removeInternal(key);
             movetoHead(existingNode);
             cache.put(key, existingNode);
         }
@@ -82,94 +65,101 @@ public class ThreadSafeLRUCache<K, V> {
                 cache.remove(tail.prev.key);
                 removeTail();
             }
-            //If the hashMap is already full delete a node.
-            //Add a new node with the given key value to the head of the linked list.
             Node newNode = new Node(key, value);
-            movetoHead(newNode);
             cache.put(key, newNode);
+            movetoHead(newNode);
         }
-     }
+    }
 
-     private V removeInternal(K key){
+    private V removeInternal(K key) {
         Node removeNode = cache.get(key);
         removeNode(cache.get(key));
         remove(key);
         return removeNode.value;
-     }
-
-     //P3
-
-    public V get(K key){
-
-     }
-
-    public void put(K key, V value){
-
     }
 
-     public boolean containsKey(K key){
+    public V get(K key) {
+        readLock.lock();
+        try {
+            return getInternal(key);
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-     }
+    public void put(K key, V value) {
+        writeLock.lock();
+        try {
+            putInternal(key, value);
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
-     public int size(){
+    public boolean containsKey(K key) {
+        readLock.lock();
+        try {
+            return cache.containsKey(key);
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-     }
+    public int size() {
+        readLock.lock();
+        try {
+            return cache.size();
+        } finally {
+            readLock.unlock();
+        }
+    }
 
-     public void clear(){
+    public void clear() {
+        writeLock.lock();
+        try {
+            cache.clear();
+            head.next = tail;
+            tail.prev = head;
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
-     }
-
-     public V remove(K key){
-
-     }
+    public V remove(K key) {
+        writeLock.lock();
+        try {
+            if (cache.containsKey(key)) {
+                return removeInternal(key);
+            }
+            return null;
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
     private void removeNode(Node node) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
+        if (node.prev != null) {
+            node.prev.next = node.next;
+        }
+        if (node.next != null) {
+            node.next.prev = node.prev;
+        }
     }
 
     private void movetoHead(Node node) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
+        removeNode(node);
+        node.prev = head;
+        node.next = head.next;
+        head.next.prev = node;
+        head.next = node;
     }
 
     private Node removeTail() {
         Node removed = tail.prev;
         if (removed == head) {
-            return null; // cache empty
+            return null;
         }
         removeNode(removed);
         return removed;
     }
-    /*
-     * Person 2: Cache Operations (non thread safe)
-     * - Implement the internal cache methods that will use my linked list
-     * operations:
-     * - getInternal(K key) - Retrieves a value and moves the node to the front
-     * - putInternal(K key, V value) - Adds/updates a value and handles eviction
-     * - removeInternal(K key) - Removes a specific key
-     * - Make sure to use the linked list methods I created (addToHead, moveToHead,
-     * etc.)
-     * - Don't worry about thread safety yet - Person 3 will handle that
-     * 
-     * ### Person 3 (Thread Safety):
-     * - Add concurrency controls using ReadWriteLock or similar
-     * - Create the public API methods that wrap Person 2's internal methods:
-     * - get(K key) - Thread-safe version that uses readLock
-     * - put(K key, V value) - Thread-safe version that uses writeLock
-     * - Other operations like containsKey(), size(), clear(), etc.
-     * - Implement multi-threaded tests to verify thread safety
-     * 
-     */
-
-
-
-
-
-
-
-
-
-
-
 }
