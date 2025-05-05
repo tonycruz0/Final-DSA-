@@ -79,7 +79,7 @@ public class ThreadSafeLRUCache<K, V> {
         }
         else{
             if(cache.size() == capacity){
-                remove(tail.prev.key);
+                cache.remove(tail.prev.key);
                 removeTail();
             }
             //If the hashMap is already full delete a node.
