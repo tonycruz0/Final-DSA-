@@ -160,17 +160,4 @@ public class ThreadSafeLRUCache<K, V> {
         removeNode(removed);
         return removed;
     }
-
-    public static void main(String[] args) {
-        ThreadSafeLRUCache<Integer, String> cache = new ThreadSafeLRUCache<>(3);
-        cache.put(1, "One");
-        cache.put(2, "Two");
-        cache.put(3, "Three");
-
-        System.out.println(cache.get(1)); 
-        cache.put(4, "Four");
-        System.out.println(cache.containsKey(2)); 
-        System.out.println(cache.get(3)); 
-        System.out.println(cache.size()); 
-    }
 }
